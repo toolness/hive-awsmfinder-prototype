@@ -63,6 +63,15 @@ a.close-box {
   padding: 0 10px;
   line-height: 30px;
 }
+
+span.hive-address {
+  cursor: pointer;
+  border-bottom: 1px dotted rgba(0, 0, 0, 0.75);
+}
+
+span.hive-address:hover {
+  background: #f0f0f0;
+}
 </style>
 <title>AWSM Finder Prototype</title>
 <div id="map"></div>
@@ -127,13 +136,13 @@ $.when(
     });
     programInfo[id] = {
       title: title,
-      tagline: tagline,
-      content: content.html()
+      tagline: tagline
     };
     $('.hive-address', content).each(function() {;
       var address = $.trim($(this).text());
       if (address && address in geocodes) {
         var unique_addr = geocodes[address].formatted_address;
+        $(this).attr('data-unique-address', unique_addr);
         if (!(unique_addr in addrInfo))
           addrInfo[unique_addr] = [];
         addrInfo[unique_addr].push({
@@ -144,19 +153,32 @@ $.when(
         });
       }
     });
+    programInfo[id].content = content.html();
   });
   Object.keys(addrInfo).forEach(function(addr) {
     var tooltipHTML = _.template($("#tooltip").text(), {
       programs: addrInfo[addr]
     });
-    makeMarker({
+    var layer = makeMarker({
       coordinates: addrInfo[addr][0].coordinates
     }).bindPopup(tooltipHTML, {
       closeButton: false,
       minWidth: 320
-    }).addTo(map.featureLayer);
+    });
+    layer.addTo(map.featureLayer);
+    addrInfo[addr].layer = layer;
   });
   $(window).trigger('hashchange');
+});
+
+$(document.documentElement).on('click', '[data-unique-address]', function(e) {
+  var unique_addr = $(e.target).attr('data-unique-address');
+  if (unique_addr in addrInfo) {
+    addrInfo[unique_addr].layer.eachLayer(function(sublayer) {
+      map.setView(sublayer.getLatLng());
+      sublayer.openPopup();
+    });
+  }
 });
 
 $(window).on('hashchange', function() {
