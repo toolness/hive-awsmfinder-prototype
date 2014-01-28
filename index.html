@@ -154,7 +154,7 @@ $.when(
     }).bindPopup(tooltipHTML, {
       closeButton: false,
       minWidth: 320
-    }).addTo(map);
+    }).addTo(map.featureLayer);
   });
   $(window).trigger('hashchange');
 });
@@ -168,5 +168,12 @@ $(window).on('hashchange', function() {
       program: programInfo[id]
     });
   $("#panel").html(detailsHTML);
+
+  map.featureLayer.eachLayer(function(layer) {
+    if (!layer.eachLayer) return;
+    layer.eachLayer(function(sublayer) {
+      if (sublayer.closePopup) sublayer.closePopup();
+    });
+  });
 });
 </script>
