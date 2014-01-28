@@ -2,6 +2,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <script src="https://api.tiles.mapbox.com/mapbox.js/v1.6.1/mapbox.js"></script>
+<base target="_blank">
 <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox.js/v1.6.1/mapbox.css">
 <style>
 body {
@@ -36,6 +37,7 @@ function addMarker(map, options) {
     },
     properties: {
       title: options.title,
+      description: options.description,
       'marker-size': 'small',
       'marker-color': '#f0a'
     }
@@ -51,12 +53,14 @@ $.when(
   $('h3', programs).each(function() {
     var title = $(this).text();
     var content = $('<div></div>').append($(this).nextUntil('h3'));
+    $('img', content).remove();
     $('.hive-address', content).each(function() {;
       var address = $.trim($(this).text());
       if (address && address in geocodes)
         addMarker(map, {
           coordinates: geocodes[address],
-          title: title
+          title: title,
+          description: content.html()
         });
     });
   });
