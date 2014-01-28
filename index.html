@@ -200,7 +200,9 @@ $(window).on('hashchange', function() {
     detailsHTML = _.template($("#details").text(), {
       program: programInfo[id]
     });
-  $("#panel").html(detailsHTML);
+
+  if (!detailsHTML) return $("#panel").fadeOut();
+  $("#panel").html(detailsHTML).fadeIn();
 
   map.featureLayer.eachLayer(function(layer) {
     if (!layer.eachLayer) return;
