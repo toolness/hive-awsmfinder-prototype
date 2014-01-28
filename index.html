@@ -2,7 +2,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <script src="https://api.tiles.mapbox.com/mapbox.js/v1.6.1/mapbox.js"></script>
-<base target="_blank">
 <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox.js/v1.6.1/mapbox.css">
 <style>
 body {
@@ -17,10 +16,13 @@ body {
   width: 100%;
 }
 
+.awsm-title {
+  font-weight: bold;
+}
+
 a.awsm-details {
   display: inline-block;
   font-size: smaller;
-  cursor: pointer;
   background: #f0f0f0;
   padding: 0 4px;
 }
@@ -31,7 +33,7 @@ a.awsm-details {
 <script src="underscore.js"></script>
 <script type="text/html" id="tooltip">
 <% programs.forEach(function(program) { %>
-  <div class="marker-title"><%- program.title %></div>
+  <div class="awsm-title"><%- program.title %></div>
   <p><%- program.tagline %> <a class="awsm-details" href="#<%- program.id %>">details&hellip;</a></p>
 <% }) %>
 </script>
@@ -43,19 +45,18 @@ var map = L.mapbox
     detectRetina: true
   }));
 
-function addMarker(map, options) {
-  L.mapbox.markerLayer({
+function makeMarker(options) {
+  return L.mapbox.markerLayer({
     type: 'Feature',
     geometry: {
       type: 'Point',
       coordinates: [options.coordinates.lng, options.coordinates.lat]
     },
     properties: {
-      description: options.description,
       'marker-size': 'small',
       'marker-color': '#f0a'
     }
-  }).addTo(map);
+  });
 }
 
 function getTagline(programs, id) {
@@ -95,10 +96,12 @@ $.when(
       var tooltipHTML = _.template($("#tooltip").text(), {
         programs: addrInfo[addr]
       });
-      addMarker(map, {
-        coordinates: addrInfo[addr][0].coordinates,
-        description: tooltipHTML
-      });
+      makeMarker({
+        coordinates: addrInfo[addr][0].coordinates
+      }).bindPopup(tooltipHTML, {
+        closeButton: false,
+        minWidth: 320
+      }).addTo(map);
     });
   });
 });
