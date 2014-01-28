@@ -53,12 +53,20 @@ a.awsm-details {
   color: rgba(0, 0, 0, 0.75);
   overflow: scroll;
 }
+
+a.close-box {
+  background: #f0f0f0;
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 20px;
+  padding: 0 10px;
+  line-height: 30px;
+}
 </style>
 <title>AWSM Finder Prototype</title>
 <div id="map"></div>
-<div id="panel">
-  <h1>Afterschool Programs for Teens: Mid-Winter 2014 Edition</h1>
-</div>
+<div id="panel"></div>
 <script src="jquery.js"></script>
 <script src="underscore.js"></script>
 <script type="text/html" id="tooltip">
@@ -67,6 +75,11 @@ a.awsm-details {
   <p><%- program.tagline %> <a class="awsm-details" href="#<%- program.id %>">details&hellip;</a></p>
 <% }) %>
 </script>
+<script type="text/html" id="details">
+  <h3><%- program.title %></h3>
+  <%= program.content %>
+  <a class="close-box" href="#">&times;</a>
+</script>
 <script>
 var map = L.mapbox
   .map('map')
@@ -74,6 +87,8 @@ var map = L.mapbox
   .addLayer(L.mapbox.tileLayer('toolness.map-137lwd3c', {
     detectRetina: true
   }));
+var addrInfo = {};
+var programInfo = {};
 
 function makeMarker(options) {
   return L.mapbox.markerLayer({
@@ -99,7 +114,6 @@ $.when(
   $.ajax('afterschool-programs.html'),
   $.ajax('geocodes.json')
 ).done(function(programs, geocodes) {
-  var addrInfo = {};
   programs = $('<div></div>').append($(programs[0]));
   geocodes = geocodes[0];
   $('h3', programs).each(function() {
@@ -107,6 +121,15 @@ $.when(
     var tagline = getTagline(programs, id);
     var title = $(this).text();
     var content = $('<div></div>').append($(this).nextUntil('h3').clone());
+
+    content.find('a[href]').each(function() {
+      $(this).attr('target', '_blank');
+    });
+    programInfo[id] = {
+      title: title,
+      tagline: tagline,
+      content: content.html()
+    };
     $('.hive-address', content).each(function() {;
       var address = $.trim($(this).text());
       if (address && address in geocodes) {
@@ -116,9 +139,8 @@ $.when(
         addrInfo[unique_addr].push({
           coordinates: geocodes[address],
           id: id,
-          title: title,
-          tagline: tagline,
-          content: content.html()
+          title: programInfo[id].title,
+          tagline: programInfo[id].tagline
         });
       }
     });
@@ -133,8 +155,18 @@ $.when(
         minWidth: 320
       }).addTo(map);
     });
-    $("img", programs).remove();
-    $("#panel").append(programs);
   });
+  $(window).trigger('hashchange');
+});
+
+$(window).on('hashchange', function() {
+  var id = location.hash.slice(1);
+  var detailsHTML = '';
+
+  if (id in programInfo)
+    detailsHTML = _.template($("#details").text(), {
+      program: programInfo[id]
+    });
+  $("#panel").html(detailsHTML);
 });
 </script>
