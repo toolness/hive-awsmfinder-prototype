@@ -1,0 +1,16 @@
+{
+  "name": "hivenyc-awsm-finder-prototype",
+  "version": "0.0.1",
+  "description": "Hive NYC AWSM Finder Prototype",
+  "dependencies": {
+    "async": "~0.2.10",
+    "cheerio": "~0.13.1",
+    "request": "~2.33.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "BSD"
+}

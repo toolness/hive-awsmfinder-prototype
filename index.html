@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<script src="https://api.tiles.mapbox.com/mapbox.js/v1.6.1/mapbox.js"></script>
+<link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox.js/v1.6.1/mapbox.css">
+<style>
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#map {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+</style>
+<title>AWSM Finder Prototype</title>
+<div id="map"></div>
+<script src="jquery.js"></script>
+<script>
+var map = L.mapbox
+  .map('map', 'toolness.map-137lwd3c')
+  .setView([40.738, -73.936], 12);
+
+function addMarker(map, options) {
+  L.mapbox.markerLayer({
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
+      coordinates: [options.coordinates.lng, options.coordinates.lat]
+    },
+    properties: {
+      title: options.title,
+      'marker-size': 'small',
+      'marker-color': '#f0a'
+    }
+  }).addTo(map);
+}
+
+$.when(
+  $.ajax('afterschool-programs.html'),
+  $.ajax('geocodes.json')
+).done(function(programs, geocodes) {
+  programs = $('<div></div>').append($(programs[0]));
+  geocodes = geocodes[0];
+  $('h3', programs).each(function() {
+    var title = $(this).text();
+    var content = $('<div></div>').append($(this).nextUntil('h3'));
+    $('.hive-address', content).each(function() {;
+      var address = $.trim($(this).text());
+      if (address && address in geocodes)
+        addMarker(map, {
+          coordinates: geocodes[address],
+          title: title
+        });
+    });
+  });
+});
+</script>
