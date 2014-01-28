@@ -44,6 +44,12 @@ function addMarker(map, options) {
   }).addTo(map);
 }
 
+function getTagline(programs, id) {
+  var li = $('li > a[href="#' + id + '"]', programs).parent().clone();
+  $('a', li).remove();
+  return li.text().slice(1);
+}
+
 $.when(
   $.ajax('afterschool-programs.html'),
   $.ajax('geocodes.json')
@@ -51,8 +57,10 @@ $.when(
   programs = $('<div></div>').append($(programs[0]));
   geocodes = geocodes[0];
   $('h3', programs).each(function() {
+    var id = $(this).prev('p').find('a').attr('name');
+    var tagline = getTagline(programs, id);
     var title = $(this).text();
-    var content = $('<div></div>').append($(this).nextUntil('h3'));
+    var content = $('<div></div>').append($(this).nextUntil('h3').clone());
     $('img', content).remove();
     $('.hive-address', content).each(function() {;
       var address = $.trim($(this).text());
@@ -60,7 +68,7 @@ $.when(
         addMarker(map, {
           coordinates: geocodes[address],
           title: title,
-          description: content.html()
+          description: tagline
         });
     });
   });
