@@ -26,9 +26,39 @@ a.awsm-details {
   background: #f0f0f0;
   padding: 0 4px;
 }
+
+#panel a {
+  color: #3887BE;
+  text-decoration: none;
+}
+
+#panel a:hover {
+  color: #63b6e5;
+}
+
+#panel {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  max-height: 33%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  margin: 20px;
+  padding: 0 20px;
+  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  line-height: 25px;
+  color: rgba(0, 0, 0, 0.75);
+  overflow: scroll;
+}
 </style>
 <title>AWSM Finder Prototype</title>
 <div id="map"></div>
+<div id="panel">
+  <h1>Afterschool Programs for Teens: Mid-Winter 2014 Edition</h1>
+</div>
 <script src="jquery.js"></script>
 <script src="underscore.js"></script>
 <script type="text/html" id="tooltip">
@@ -103,6 +133,8 @@ $.when(
         minWidth: 320
       }).addTo(map);
     });
+    $("img", programs).remove();
+    $("#panel").append(programs);
   });
 });
 </script>
