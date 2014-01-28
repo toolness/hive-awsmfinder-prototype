@@ -144,17 +144,17 @@ $.when(
         });
       }
     });
-    Object.keys(addrInfo).forEach(function(addr) {
-      var tooltipHTML = _.template($("#tooltip").text(), {
-        programs: addrInfo[addr]
-      });
-      makeMarker({
-        coordinates: addrInfo[addr][0].coordinates
-      }).bindPopup(tooltipHTML, {
-        closeButton: false,
-        minWidth: 320
-      }).addTo(map);
+  });
+  Object.keys(addrInfo).forEach(function(addr) {
+    var tooltipHTML = _.template($("#tooltip").text(), {
+      programs: addrInfo[addr]
     });
+    makeMarker({
+      coordinates: addrInfo[addr][0].coordinates
+    }).bindPopup(tooltipHTML, {
+      closeButton: false,
+      minWidth: 320
+    }).addTo(map);
   });
   $(window).trigger('hashchange');
 });
