@@ -177,7 +177,7 @@ $.when(
       var address = $.trim($(this).text());
       if (address && address in geocodes) {
         var unique_addr = geocodes[address].formatted_address;
-        $(this).attr('data-unique-address', unique_addr);
+        $(this).attr('data-unique-addr', unique_addr);
         if (!(unique_addr in addrInfo))
           addrInfo[unique_addr] = [];
         addrInfo[unique_addr].push({
@@ -201,8 +201,8 @@ $.when(
   $(window).trigger('hashchange');
 });
 
-$(document.documentElement).on('click', '[data-unique-address]', function(e) {
-  var unique_addr = $(e.target).attr('data-unique-address');
+$(document.documentElement).on('click', '[data-unique-addr]', function(e) {
+  var unique_addr = $(e.target).attr('data-unique-addr');
   if (unique_addr in addrInfo) {
     var marker = addrInfo[unique_addr].marker;
     map.setView(marker.getLatLng());
