@@ -183,34 +183,34 @@ $.when(
     $('.hive-address', content).each(function() {;
       var address = $.trim($(this).text());
       if (address && address in geocodes) {
-        var unique_addr = geocodes[address].formatted_address;
-        $(this).attr('data-unique-addr', unique_addr);
-        if (!(unique_addr in addrInfo))
-          addrInfo[unique_addr] = {
+        var addrID = geocodes[address].formatted_address;
+        $(this).attr('data-addr-id', addrID);
+        if (!(addrID in addrInfo))
+          addrInfo[addrID] = {
             programs: [],
             coordinates: geocodes[address],
             marker: null
           };
-        addrInfo[unique_addr].programs.push(programInfo[id]);
+        addrInfo[addrID].programs.push(programInfo[id]);
       }
     });
     programInfo[id].content = content.html();
   });
-  Object.keys(addrInfo).forEach(function(addr) {
+  Object.keys(addrInfo).forEach(function(addrID) {
     geoJSON.features.push(makeMarker({
-      id: addr,
-      coordinates: addrInfo[addr].coordinates,
-      programs: addrInfo[addr].programs
+      id: addrID,
+      coordinates: addrInfo[addrID].coordinates,
+      programs: addrInfo[addrID].programs
     }));
   });
   map.featureLayer.setGeoJSON(geoJSON);
   $(window).trigger('hashchange');
 });
 
-$(document.documentElement).on('click', '[data-unique-addr]', function(e) {
-  var unique_addr = $(e.target).attr('data-unique-addr');
-  if (unique_addr in addrInfo) {
-    var marker = addrInfo[unique_addr].marker;
+$(document.documentElement).on('click', '[data-addr-id]', function(e) {
+  var id = $(e.target).attr('data-addr-id');
+  if (id in addrInfo) {
+    var marker = addrInfo[id].marker;
     map.setView(marker.getLatLng());
     marker.openPopup();
   }
