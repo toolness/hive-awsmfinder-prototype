@@ -178,10 +178,11 @@ $.when(
       if (address && address in geocodes) {
         var unique_addr = geocodes[address].formatted_address;
         $(this).attr('data-unique-addr', unique_addr);
-        if (!(unique_addr in addrInfo))
+        if (!(unique_addr in addrInfo)) {
           addrInfo[unique_addr] = [];
+          addrInfo[unique_addr].coordinates = geocodes[address];
+        }
         addrInfo[unique_addr].push({
-          coordinates: geocodes[address],
           id: id,
           title: programInfo[id].title,
           tagline: programInfo[id].tagline
@@ -193,7 +194,7 @@ $.when(
   Object.keys(addrInfo).forEach(function(addr) {
     geoJSON.features.push(makeMarker({
       id: addr,
-      coordinates: addrInfo[addr][0].coordinates,
+      coordinates: addrInfo[addr].coordinates,
       programs: addrInfo[addr]
     }));
   });
