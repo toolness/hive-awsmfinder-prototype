@@ -40,30 +40,25 @@ a.awsm-details {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  max-height: 40%;
+  height: 40%;
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   background: white;
   margin: 20px;
-  padding: 0 20px;
   font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
   font-size: 15px;
   line-height: 25px;
   color: rgba(0, 0, 0, 0.75);
-  overflow-y: scroll;
-  -webkit-overflow-scrolling: touch;
+  display: flex;
+  display: -webkit-flex;
+  flex-direction: column;
+  -webkit-flex-direction: column;
 }
 
-#panel img {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-  display: block;
-  margin: 8px 0;
-  max-width: 100%;
-  height: auto;
+#panel > div {
+  padding: 0 20px;
 }
 
 a.close-box {
@@ -85,6 +80,27 @@ span.hive-address {
 span.hive-address:hover {
   background: #f0f0f0;
 }
+
+.title-bar {
+  background: #f0f0f0;
+}
+
+.program-content {
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  -webkit-flex: 1;
+}
+
+.program-content img {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  display: block;
+  margin: 8px 0;
+  max-width: 100%;
+  height: auto;
+}
 </style>
 <title>AWSMfinder Prototype</title>
 <div id="map"></div>
@@ -100,9 +116,13 @@ span.hive-address:hover {
 <% }) %>
 </script>
 <script type="text/html" id="details">
-  <h3><%- program.title %></h3>
-  <%= program.content %>
-  <a class="close-box" href="#">&times;</a>
+  <div class="title-bar">
+    <h3><%- program.title %></h3>
+    <a class="close-box" href="#">&times;</a>
+  </div>
+  <div class="program-content">
+    <%= program.content %>
+  </div>
 </script>
 <script>
 var MARKER_COLOR = '#f0a';
