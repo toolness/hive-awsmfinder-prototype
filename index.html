@@ -204,11 +204,9 @@ $.when(
 
 $(document.documentElement).on('click', '[data-addr-id]', function(e) {
   var id = $(e.target).attr('data-addr-id');
-  if (id in addrInfo) {
-    var marker = addrInfo[id].marker;
-    map.setView(marker.getLatLng());
-    marker.openPopup();
-  }
+  var marker = addrInfo[id].marker;
+  map.setView(marker.getLatLng());
+  marker.openPopup();
 });
 
 $(window).on('hashchange', function() {
