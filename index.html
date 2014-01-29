@@ -121,13 +121,10 @@ function makeGeoJSON(featuredProgramID) {
     type: "FeatureCollection",
     features: Object.keys(addrInfo).map(function(id) {
       var info = addrInfo[id];
-      var color = MARKER_COLOR;
+      var color = info.programs.filter(function(programInfo) {
+        return programInfo.id == featuredProgramID;
+      }).length ? MARKER_HIGHLIGHT_COLOR : MARKER_COLOR;
 
-      if (featuredProgramID)
-        info.programs.forEach(function(programInfo) {
-          if (programInfo.id == featuredProgramID)
-            color = MARKER_HIGHLIGHT_COLOR;
-        });
       return {
         type: 'Feature',
         id: id,
