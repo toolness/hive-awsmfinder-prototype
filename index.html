@@ -94,7 +94,9 @@ span.hive-address:hover {
 <script type="text/html" id="popup">
 <% programs.forEach(function(program) { %>
   <div class="awsm-title"><%- program.title %></div>
-  <p><%- program.tagline %> <a class="awsm-details" href="#<%- program.id %>">details &raquo;</a></p>
+  <p><%- program.tagline %>
+    <a class="awsm-details" href="#<%- program.id %>">details &raquo;</a>
+  </p>
 <% }) %>
 </script>
 <script type="text/html" id="details">
