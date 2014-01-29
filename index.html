@@ -107,7 +107,6 @@ span.hive-address:hover {
 <script>
 var map = L.mapbox
   .map('map')
-  .setView([40.738, -73.936], 12)
   .addLayer(L.mapbox.tileLayer('toolness.map-137lwd3c', {
     detectRetina: true
   }));
@@ -201,6 +200,7 @@ $.when(
     });
   });
   map.featureLayer.setGeoJSON(makeGeoJSON());
+  map.fitBounds(map.featureLayer.getBounds());
   $(window).trigger('hashchange');
 });
 
