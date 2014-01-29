@@ -163,6 +163,10 @@ function registerProgram(geocodes, content, info) {
   programInfo[info.id] = info;
 }
 
+function hidePopups() {
+  map.featureLayer.eachLayer(function(marker) { marker.closePopup(); });
+}
+
 map.featureLayer.on('layeradd', function addPopup(e) {
   var marker = e.layer;
   var feature = marker.feature;
@@ -204,7 +208,9 @@ $.when(
   $(window).trigger('hashchange');
 });
 
-$(document.documentElement).on('click', '[data-addr-id]', function(e) {
+$('body').on('click', 'a[href^="#"]', hidePopups);
+
+$('body').on('click', '[data-addr-id]', function(e) {
   var id = $(e.target).attr('data-addr-id');
   var marker = addrInfo[id].marker;
   map.setView(marker.getLatLng());
@@ -222,7 +228,6 @@ $(window).on('hashchange', function() {
 
   if (!detailsHTML) return $("#panel").fadeOut();
   $("#panel").html(detailsHTML).fadeIn();
-
-  map.featureLayer.eachLayer(function(marker) { marker.closePopup(); });
+  hidePopups();
 });
 </script>
