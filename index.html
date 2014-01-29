@@ -105,6 +105,9 @@ span.hive-address:hover {
   <a class="close-box" href="#">&times;</a>
 </script>
 <script>
+var MARKER_COLOR = '#f0a';
+var MARKER_HIGHLIGHT_COLOR = '#fcd116';
+
 var map = L.mapbox
   .map('map')
   .addLayer(L.mapbox.tileLayer('toolness.map-137lwd3c', {
@@ -113,11 +116,18 @@ var map = L.mapbox
 var addrInfo = {};
 var programInfo = {};
 
-function makeGeoJSON() {
+function makeGeoJSON(featuredProgramID) {
   return {
     type: "FeatureCollection",
     features: Object.keys(addrInfo).map(function(id) {
       var info = addrInfo[id];
+      var color = MARKER_COLOR;
+
+      if (featuredProgramID)
+        info.programs.forEach(function(programInfo) {
+          if (programInfo.id == featuredProgramID)
+            color = MARKER_HIGHLIGHT_COLOR;
+        });
       return {
         type: 'Feature',
         id: id,
@@ -128,7 +138,7 @@ function makeGeoJSON() {
         properties: {
           'programs': info.programs,
           'marker-size': 'small',
-          'marker-color': '#f0a'
+          'marker-color': color
         }
       };
     }),
@@ -226,6 +236,7 @@ $(window).on('hashchange', function() {
       program: programInfo[id]
     });
 
+  map.featureLayer.setGeoJSON(makeGeoJSON(id));
   if (!detailsHTML) return $("#panel").fadeOut();
   $("#panel").html(detailsHTML).fadeIn();
   hidePopups();
