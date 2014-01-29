@@ -91,7 +91,7 @@ span.hive-address:hover {
 <div id="panel"></div>
 <script src="jquery.js"></script>
 <script src="underscore.js"></script>
-<script type="text/html" id="tooltip">
+<script type="text/html" id="popup">
 <% programs.forEach(function(program) { %>
   <div class="awsm-title"><%- program.title %></div>
   <p><%- program.tagline %> <a class="awsm-details" href="#<%- program.id %>">details &raquo;</a></p>
@@ -109,21 +109,27 @@ var map = L.mapbox
   .addLayer(L.mapbox.tileLayer('toolness.map-137lwd3c', {
     detectRetina: true
   }));
+var geoJSON = {
+  type: "FeatureCollection",
+  features: []
+};
 var addrInfo = {};
 var programInfo = {};
 
 function makeMarker(options) {
-  return L.mapbox.markerLayer({
+  return {
     type: 'Feature',
+    id: options.id,
     geometry: {
       type: 'Point',
       coordinates: [options.coordinates.lng, options.coordinates.lat]
     },
     properties: {
+      'programs': options.programs,
       'marker-size': 'small',
       'marker-color': '#f0a'
     }
-  });
+  };
 }
 
 function getTagline(programs, id) {
@@ -131,6 +137,20 @@ function getTagline(programs, id) {
   $('a', li).remove();
   return li.text().slice(1);
 }
+
+map.featureLayer.on('layeradd', function addPopup(e) {
+  var marker = e.layer;
+  var feature = marker.feature;
+  var popupHTML = _.template($("#popup").text(), {
+    programs: feature.properties.programs
+  });
+
+  marker.bindPopup(popupHTML, {
+    closeButton: false,
+    minWidth: 320
+  });
+  addrInfo[feature.id].marker = marker;
+});
 
 $.when(
   $.ajax('afterschool-programs.html'),
@@ -169,28 +189,22 @@ $.when(
     programInfo[id].content = content.html();
   });
   Object.keys(addrInfo).forEach(function(addr) {
-    var tooltipHTML = _.template($("#tooltip").text(), {
+    geoJSON.features.push(makeMarker({
+      id: addr,
+      coordinates: addrInfo[addr][0].coordinates,
       programs: addrInfo[addr]
-    });
-    var layer = makeMarker({
-      coordinates: addrInfo[addr][0].coordinates
-    }).bindPopup(tooltipHTML, {
-      closeButton: false,
-      minWidth: 320
-    });
-    layer.addTo(map.featureLayer);
-    addrInfo[addr].layer = layer;
+    }));
   });
+  map.featureLayer.setGeoJSON(geoJSON);
   $(window).trigger('hashchange');
 });
 
 $(document.documentElement).on('click', '[data-unique-address]', function(e) {
   var unique_addr = $(e.target).attr('data-unique-address');
   if (unique_addr in addrInfo) {
-    addrInfo[unique_addr].layer.eachLayer(function(sublayer) {
-      map.setView(sublayer.getLatLng());
-      sublayer.openPopup();
-    });
+    var marker = addrInfo[unique_addr].marker;
+    map.setView(marker.getLatLng());
+    marker.openPopup();
   }
 });
 
@@ -206,11 +220,6 @@ $(window).on('hashchange', function() {
   if (!detailsHTML) return $("#panel").fadeOut();
   $("#panel").html(detailsHTML).fadeIn();
 
-  map.featureLayer.eachLayer(function(layer) {
-    if (!layer.eachLayer) return;
-    layer.eachLayer(function(sublayer) {
-      if (sublayer.closePopup) sublayer.closePopup();
-    });
-  });
+  map.featureLayer.eachLayer(function(marker) { marker.closePopup(); });
 });
 </script>
