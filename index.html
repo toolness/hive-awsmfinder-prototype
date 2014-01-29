@@ -154,6 +154,14 @@ map.featureLayer.on('layeradd', function addPopup(e) {
   addrInfo[feature.id].marker = marker;
 });
 
+$.fn.extend({
+  targetExternalLinks: function(target) {
+    this.find('a[href]').each(function() {
+      $(this).attr('target', target);
+    });
+  }
+});
+
 $.when(
   $.ajax('afterschool-programs.html'),
   $.ajax('geocodes.json')
@@ -166,9 +174,7 @@ $.when(
     var title = $(this).text();
     var content = $('<div></div>').append($(this).nextUntil('h3').clone());
 
-    content.find('a[href]').each(function() {
-      $(this).attr('target', '_blank');
-    });
+    content.targetExternalLinks('_blank');
     programInfo[id] = {
       title: title,
       tagline: tagline
