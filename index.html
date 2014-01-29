@@ -176,6 +176,7 @@ $.when(
 
     content.targetExternalLinks('_blank');
     programInfo[id] = {
+      id: id,
       title: title,
       tagline: tagline
     };
@@ -184,15 +185,13 @@ $.when(
       if (address && address in geocodes) {
         var unique_addr = geocodes[address].formatted_address;
         $(this).attr('data-unique-addr', unique_addr);
-        if (!(unique_addr in addrInfo)) {
-          addrInfo[unique_addr] = [];
-          addrInfo[unique_addr].coordinates = geocodes[address];
-        }
-        addrInfo[unique_addr].push({
-          id: id,
-          title: programInfo[id].title,
-          tagline: programInfo[id].tagline
-        });
+        if (!(unique_addr in addrInfo))
+          addrInfo[unique_addr] = {
+            programs: [],
+            coordinates: geocodes[address],
+            marker: null
+          };
+        addrInfo[unique_addr].programs.push(programInfo[id]);
       }
     });
     programInfo[id].content = content.html();
@@ -201,7 +200,7 @@ $.when(
     geoJSON.features.push(makeMarker({
       id: addr,
       coordinates: addrInfo[addr].coordinates,
-      programs: addrInfo[addr]
+      programs: addrInfo[addr].programs
     }));
   });
   map.featureLayer.setGeoJSON(geoJSON);
