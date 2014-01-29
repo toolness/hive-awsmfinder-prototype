@@ -101,7 +101,7 @@ span.hive-address:hover {
 </script>
 <script type="text/html" id="details">
   <h3><%- program.title %></h3>
-  <%= program.content.html() %>
+  <%= program.content %>
   <a class="close-box" href="#">&times;</a>
 </script>
 <script>
@@ -142,6 +142,28 @@ function getTagline(programs, id) {
   return li.text().slice(1);
 }
 
+function registerProgram(geocodes, content, info) {
+  content = $('<div></div>').append(content.clone());
+  content.targetExternalLinks('_blank');
+  $('.hive-address', content).each(function() {;
+    var address = $.trim($(this).text());
+    if (address && address in geocodes) {
+      var addrID = geocodes[address].formatted_address;
+      $(this).attr('data-addr-id', addrID);
+      if (!(addrID in addrInfo))
+        addrInfo[addrID] = {
+          programs: [],
+          coordinates: geocodes[address],
+          marker: null
+        };
+      addrInfo[addrID].programs.push(info);
+    }
+  });
+
+  info.content = content.html();
+  programInfo[info.id] = info;
+}
+
 map.featureLayer.on('layeradd', function addPopup(e) {
   var marker = e.layer;
   var feature = marker.feature;
@@ -169,33 +191,13 @@ $.when(
   $.ajax('geocodes.json')
 ).done(function(programs, geocodes) {
   programs = $('<div></div>').append($(programs[0]));
-  geocodes = geocodes[0];
   $('h3', programs).each(function() {
     var id = $(this).prev('p').find('a').attr('name');
-    var tagline = getTagline(programs, id);
-    var title = $(this).text();
-    var content = $('<div></div>').append($(this).nextUntil('h3').clone());
 
-    content.targetExternalLinks('_blank');
-    programInfo[id] = {
+    registerProgram(geocodes[0], $(this).nextUntil('h3'), {
       id: id,
-      title: title,
-      tagline: tagline,
-      content: content
-    };
-    $('.hive-address', content).each(function() {;
-      var address = $.trim($(this).text());
-      if (address && address in geocodes) {
-        var addrID = geocodes[address].formatted_address;
-        $(this).attr('data-addr-id', addrID);
-        if (!(addrID in addrInfo))
-          addrInfo[addrID] = {
-            programs: [],
-            coordinates: geocodes[address],
-            marker: null
-          };
-        addrInfo[addrID].programs.push(programInfo[id]);
-      }
+      title: $(this).text(),
+      tagline: getTagline(programs, id),
     });
   });
   map.featureLayer.setGeoJSON(makeGeoJSON());
