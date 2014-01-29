@@ -111,26 +111,28 @@ var map = L.mapbox
   .addLayer(L.mapbox.tileLayer('toolness.map-137lwd3c', {
     detectRetina: true
   }));
-var geoJSON = {
-  type: "FeatureCollection",
-  features: []
-};
 var addrInfo = {};
 var programInfo = {};
 
-function makeMarker(options) {
+function makeGeoJSON() {
   return {
-    type: 'Feature',
-    id: options.id,
-    geometry: {
-      type: 'Point',
-      coordinates: [options.coordinates.lng, options.coordinates.lat]
-    },
-    properties: {
-      'programs': options.programs,
-      'marker-size': 'small',
-      'marker-color': '#f0a'
-    }
+    type: "FeatureCollection",
+    features: Object.keys(addrInfo).map(function(id) {
+      var info = addrInfo[id];
+      return {
+        type: 'Feature',
+        id: id,
+        geometry: {
+          type: 'Point',
+          coordinates: [info.coordinates.lng, info.coordinates.lat]
+        },
+        properties: {
+          'programs': info.programs,
+          'marker-size': 'small',
+          'marker-color': '#f0a'
+        }
+      };
+    }),
   };
 }
 
@@ -196,14 +198,7 @@ $.when(
     });
     programInfo[id].content = content.html();
   });
-  Object.keys(addrInfo).forEach(function(addrID) {
-    geoJSON.features.push(makeMarker({
-      id: addrID,
-      coordinates: addrInfo[addrID].coordinates,
-      programs: addrInfo[addrID].programs
-    }));
-  });
-  map.featureLayer.setGeoJSON(geoJSON);
+  map.featureLayer.setGeoJSON(makeGeoJSON());
   $(window).trigger('hashchange');
 });
 
