@@ -101,7 +101,7 @@ span.hive-address:hover {
 </script>
 <script type="text/html" id="details">
   <h3><%- program.title %></h3>
-  <%= program.content %>
+  <%= program.content.html() %>
   <a class="close-box" href="#">&times;</a>
 </script>
 <script>
@@ -180,7 +180,8 @@ $.when(
     programInfo[id] = {
       id: id,
       title: title,
-      tagline: tagline
+      tagline: tagline,
+      content: content
     };
     $('.hive-address', content).each(function() {;
       var address = $.trim($(this).text());
@@ -196,7 +197,6 @@ $.when(
         addrInfo[addrID].programs.push(programInfo[id]);
       }
     });
-    programInfo[id].content = content.html();
   });
   map.featureLayer.setGeoJSON(makeGeoJSON());
   $(window).trigger('hashchange');
