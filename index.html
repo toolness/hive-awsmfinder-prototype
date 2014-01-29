@@ -36,6 +36,12 @@ a.awsm-details {
   color: #63b6e5;
 }
 
+#map, #panel, #map p.awsm-tagline {
+  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  line-height: 25px;
+}
+
 #panel {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -47,9 +53,6 @@ a.awsm-details {
   right: 0;
   background: white;
   margin: 20px;
-  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
-  font-size: 15px;
-  line-height: 25px;
   color: rgba(0, 0, 0, 0.75);
   display: flex;
   display: -webkit-flex;
@@ -101,6 +104,17 @@ span.hive-address:hover {
   max-width: 100%;
   height: auto;
 }
+
+@media (max-height: 600px) {
+  #map, #panel, #map p.awsm-tagline {
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  #panel {
+    height: 50%;
+  }
+}
 </style>
 <title>AWSMfinder Prototype</title>
 <div id="map"></div>
@@ -110,7 +124,7 @@ span.hive-address:hover {
 <script type="text/html" id="popup">
 <% programs.forEach(function(program) { %>
   <div class="awsm-title"><%- program.title %></div>
-  <p><%- program.tagline %>
+  <p class="awsm-tagline"><%- program.tagline %>
     <a class="awsm-details" href="#<%- program.id %>">details &raquo;</a>
   </p>
 <% }) %>
@@ -202,7 +216,7 @@ map.featureLayer.on('layeradd', function addPopup(e) {
 
   marker.bindPopup(popupHTML, {
     closeButton: false,
-    minWidth: 320
+    minWidth: 240
   });
   addrInfo[feature.id].marker = marker;
 });
