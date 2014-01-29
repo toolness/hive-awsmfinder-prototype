@@ -121,9 +121,6 @@ function makeGeoJSON(featuredProgramID) {
     type: "FeatureCollection",
     features: Object.keys(addrInfo).map(function(id) {
       var info = addrInfo[id];
-      var color = info.programs.filter(function(programInfo) {
-        return programInfo.id == featuredProgramID;
-      }).length ? MARKER_HIGHLIGHT_COLOR : MARKER_COLOR;
 
       return {
         type: 'Feature',
@@ -135,7 +132,9 @@ function makeGeoJSON(featuredProgramID) {
         properties: {
           'programs': info.programs,
           'marker-size': 'small',
-          'marker-color': color
+          'marker-color': info.programs.filter(function(programInfo) {
+            return programInfo.id == featuredProgramID;
+          }).length ? MARKER_HIGHLIGHT_COLOR : MARKER_COLOR
         }
       };
     }),
