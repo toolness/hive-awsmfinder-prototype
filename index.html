@@ -7,6 +7,7 @@
 body {
   margin: 0;
   padding: 0;
+  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
 #map {
@@ -40,7 +41,6 @@ a.awsm-details {
 }
 
 #map, #panel, #map p.awsm-tagline {
-  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
   font-size: 15px;
   line-height: 25px;
 }
@@ -132,10 +132,50 @@ span.hive-address:hover {
     line-height: 16px;
   }
 }
+
+#filters {
+  position: absolute;
+  top: 80px;
+  left: 10px;
+  padding: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  background: white;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.75);
+}
+
+#filters h3 {
+  margin: 0;
+  font-weight: normal;
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
+#filters h3:before {
+  content: '▲ ';
+}
+
+#filters.collapsed h3:before {
+  content: '▼ ';
+}
+
+#filters.collapsed form {
+  display: none;
+}
+
+#filters label {
+  display: block;
+}
 </style>
 <title>AWSMfinder Prototype</title>
 <div id="map"></div>
 <div id="panel"></div>
+<div id="filters" class="collapsed">
+  <h3>Filters</h3>
+  <form></form>
+</div>
 <script src="jquery.js"></script>
 <script src="underscore.js"></script>
 <script type="text/html" id="popup">
@@ -155,9 +195,25 @@ span.hive-address:hover {
     <%= program.content %>
   </div>
 </script>
+<script type="text/html" id="filter">
+  <label for="filter_<%- categorySlug %>">
+    <input type="checkbox" id="filter_<%- categorySlug %>" checked
+           data-category="<%- category %>">
+    <%- category %>
+  </label>
+</script>
 <script>
 var MARKER_COLOR = '#f0a';
 var MARKER_HIGHLIGHT_COLOR = '#fcd116';
+var FILTERS = {
+  'fitness': /fitness/i,
+  'gaming': /gaming/i,
+  'fashion': /fashion/i,
+  'activism': /(activism|stereotypes)/i,
+  'film': /film/i,
+  'design': /design/i,
+  'coding': /(coding|engineering|robotics)/i,
+};
 
 var map = L.mapbox
   .map('map')
@@ -168,9 +224,17 @@ var addrInfo = {};
 var programInfo = {};
 
 function makeGeoJSON(featuredProgramID) {
+  var filters = getFilteredCategories();
+  var isFiltered = function(program) {
+    return !!_.intersection(program.categories, filters).length;
+  };
+
   return {
     type: "FeatureCollection",
-    features: Object.keys(addrInfo).map(function(id) {
+    features: Object.keys(addrInfo).filter(function(id) {
+      return programInfo.id == featuredProgramID ||
+             addrInfo[id].programs.filter(isFiltered).length;
+    }).map(function(id) {
       var info = addrInfo[id];
 
       return {
@@ -201,6 +265,7 @@ function getTagline(programs, id) {
 function registerProgram(geocodes, content, info) {
   content = $('<div></div>').append(content.clone());
   content.targetExternalLinks('_blank');
+
   $('.hive-address', content).each(function() {;
     var address = $.trim($(this).text());
     if (address && address in geocodes) {
@@ -216,6 +281,15 @@ function registerProgram(geocodes, content, info) {
     }
   });
 
+  info.categories = [];
+  Object.keys(FILTERS).forEach(function(category) {
+    var regexp = FILTERS[category];
+
+    if (regexp.test(content.text()) || regexp.test(info.tagline) ||
+        regexp.test(info.title))
+      info.categories.push(category);
+  });
+
   info.content = content.html();
   programInfo[info.id] = info;
 }
@@ -223,6 +297,21 @@ function registerProgram(geocodes, content, info) {
 function hidePopups() {
   map.featureLayer.eachLayer(function(marker) { marker.closePopup(); });
 }
+
+function getFilteredCategories() {
+  return $('#filters input[type=checkbox]').filter(function() {
+    return this.checked;
+  }).map(function() {
+    return $(this).attr('data-category');
+  }).get();
+}
+
+Object.keys(FILTERS).forEach(function addCategoryToFilterForm(category) {
+  $(_.template($("#filter").text(), {
+    category: category,
+    categorySlug: category.toLowerCase()
+  })).appendTo('#filters form');
+});
 
 map.featureLayer.on('layeradd', function addPopup(e) {
   var marker = e.layer;
@@ -273,6 +362,14 @@ $('body').on('click', '[data-addr-id]', function(e) {
   var id = $(e.target).attr('data-addr-id');
   var marker = addrInfo[id].marker;
   map.setView(marker.getLatLng());
+});
+
+$('#filters h3').click(function() {
+  $('#filters').toggleClass('collapsed');
+});
+
+$('#filters form').change(function() {
+  $(window).trigger('hashchange');
 });
 
 $(window).on('hashchange', function() {
