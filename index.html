@@ -263,6 +263,8 @@ $.when(
   $(window).trigger('hashchange');
 });
 
+$('body').on('mousedown', '#panel', hidePopups);
+
 $('body').on('click', 'a[href^="#"]', hidePopups);
 
 $('body').on('click', '[data-addr-id]', function(e) {
