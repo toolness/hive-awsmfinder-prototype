@@ -165,8 +165,9 @@ span.hive-address:hover {
   display: none;
 }
 
-#filters label {
+#filters label, #filters button {
   display: block;
+  width: 100%;
 }
 </style>
 <title>AWSMfinder Prototype</title>
@@ -174,7 +175,11 @@ span.hive-address:hover {
 <div id="panel"></div>
 <div id="filters" class="collapsed">
   <h3>Filters</h3>
-  <form></form>
+  <form>
+    <div class="categories"></div>
+    <button class="select-all">Select All</button>
+    <button class="select-none">Select None</button>
+  </form>
 </div>
 <script src="jquery.js"></script>
 <script src="underscore.js"></script>
@@ -310,7 +315,7 @@ Object.keys(FILTERS).forEach(function addCategoryToFilterForm(category) {
   $(_.template($("#filter").text(), {
     category: category,
     categorySlug: category.toLowerCase()
-  })).appendTo('#filters form');
+  })).appendTo('#filters .categories');
 });
 
 map.featureLayer.on('layeradd', function addPopup(e) {
@@ -332,6 +337,13 @@ $.fn.extend({
     this.find('a[href]').each(function() {
       $(this).attr('target', target);
     });
+    return this;
+  },
+  setCheckboxes: function(value) {
+    this.find('input[type=checkbox]').each(function() {
+      this.checked = value;
+    });
+    return this;
   }
 });
 
@@ -370,6 +382,16 @@ $('#filters h3').click(function() {
 
 $('#filters form').change(function() {
   $(window).trigger('hashchange');
+});
+
+$('#filters button.select-all').click(function() {
+  $(this).closest('form').setCheckboxes(true).trigger('change');
+  return false;
+});
+
+$('#filters button.select-none').click(function() {
+  $(this).closest('form').setCheckboxes(false).trigger('change');
+  return false;
 });
 
 $(window).on('hashchange', function() {
