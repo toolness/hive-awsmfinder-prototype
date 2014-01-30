@@ -230,15 +230,15 @@ var programInfo = {};
 
 function makeGeoJSON(featuredProgramID) {
   var filters = getFilteredCategories();
-  var isFiltered = function(program) {
-    return !!_.intersection(program.categories, filters).length;
+  var isFilteredOrFeatured = function(program) {
+    return program.id == featuredProgramID ||
+           _.intersection(program.categories, filters).length;
   };
 
   return {
     type: "FeatureCollection",
     features: Object.keys(addrInfo).filter(function(id) {
-      return programInfo.id == featuredProgramID ||
-             addrInfo[id].programs.filter(isFiltered).length;
+      return !!addrInfo[id].programs.filter(isFilteredOrFeatured).length;
     }).map(function(id) {
       var info = addrInfo[id];
 
@@ -252,8 +252,8 @@ function makeGeoJSON(featuredProgramID) {
         properties: {
           'programs': info.programs,
           'marker-size': 'small',
-          'marker-color': info.programs.filter(function(programInfo) {
-            return programInfo.id == featuredProgramID;
+          'marker-color': info.programs.filter(function(progInfo) {
+            return progInfo.id == featuredProgramID;
           }).length ? MARKER_HIGHLIGHT_COLOR : MARKER_COLOR
         }
       };
