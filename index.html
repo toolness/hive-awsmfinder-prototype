@@ -46,11 +46,7 @@ a.awsm-details {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  height: 40%;
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
   background: white;
   margin: 20px;
   color: rgba(0, 0, 0, 0.75);
@@ -108,14 +104,30 @@ span.hive-address:hover {
   height: auto;
 }
 
+@media (orientation: landscape) {
+  #panel {
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 40%;
+    height: calc(100% - 40px);
+    height: -webkit-calc(100% - 40px);
+  }
+}
+
+@media (orientation: portrait) {
+  #panel {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+  }
+}
+
 @media (max-height: 600px) {
   #map, #panel, #map p.awsm-tagline {
     font-size: 12px;
     line-height: 16px;
-  }
-
-  #panel {
-    height: 50%;
   }
 }
 </style>
