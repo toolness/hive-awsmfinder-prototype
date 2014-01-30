@@ -18,11 +18,12 @@ Some things to note:
   It's optimized for touch devices; works pretty well on tablets, and
   works decently on my iPhone albeit a bit cramped.
 
-* Once you view a program's details, the hash of your URL changes, so
-  sharing programs is easy. However, the URL hash doesn't capture things
-  like the current map viewport or the current list of category filters (it
-  probably should, at least when a user selects a "share link" button
-  or something).
+* Once you view a program's details (by tapping on a map marker and then
+  tapping "details" on one of the programs listed in the tooltip), the hash
+  of your URL changes, so sharing programs is easy. However, the URL hash
+  doesn't capture things like the current map viewport or the current list
+  of category filters (it probably should, at least when a user selects a
+  "share link" button or something).
 
 * The UX is very preliminary; needs lots of help from @iamjessklein.
 
