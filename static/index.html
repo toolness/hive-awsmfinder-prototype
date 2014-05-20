@@ -39,12 +39,9 @@ function addMarker(map, options) {
   }).addTo(map);
 }
 
-$.when(
-  $.ajax('afterschool-programs.html'),
-  $.ajax('geocodes.json')
-).done(function(programs, geocodes) {
-  programs = $('<div></div>').append($(programs[0]));
-  geocodes = geocodes[0];
+$.getJSON('/afterschool-programs.json', function(data) {
+  var programs = $('<div></div>').append($(data.programs));
+  var geocodes = data.geocodes;
   $('h3', programs).each(function() {
     var title = $(this).text();
     var content = $('<div></div>').append($(this).nextUntil('h3'));

@@ -1,6 +1,7 @@
 var express = require('express');
 var request = require('request');
 var cheerio = require('cheerio');
+var async = require('async');
 
 var app = express();
 var geocodes = {};
@@ -13,12 +14,11 @@ var GEO_COMPONENT_FILTERS = [
   'administrative_area:NY'
 ].join('|');
 
-function getArticleContent(html) {
-  var $ = cheerio.load(html);
+function getArticle($) {
   var article = $('article');
   $('header, footer, script, .social-share, .tags, ' +
     '.blog-navigation', article).remove();
-  return article.html();
+  return article;
 }
 
 function geocode(address, cb) {
@@ -47,21 +47,25 @@ function geocode(address, cb) {
   });
 }
 
-app.get('/geocode', function(req, res, next) {
-  if (!req.query.q) return next(400);
-
-  geocode(req.query.q.trim(), function(err, info) {
-    if (err) return next(err);
-    return res.send(info);
-  });
-});
-
-app.get('/afterschool-programs.html', function(req, res, next) {
+app.get('/afterschool-programs.json', function(req, res, next) {
   request.get(BLOGPOST_URL, function(err, blogRes, body) {
     if (err) return next(err);
     if (blogRes.statusCode != 200)
       return next(new Error('got http ' + blogRes.statusCode));
-    return res.send(getArticleContent(body));
+    var $ = cheerio.load(body);
+    var article = getArticle($);
+    var addresses = article.find('.hive-address').map(function() {
+      return $(this).text().trim();
+    });
+
+    async.each(addresses, geocode, function(err) {
+      if (err) return next(err);
+
+      return res.send({
+        programs: article.html(),
+        geocodes: geocodes
+      });
+    });
   });
 });
 
