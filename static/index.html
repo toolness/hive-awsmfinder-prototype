@@ -272,10 +272,13 @@ function registerProgram(geocodes, content, info) {
   content = $('<div></div>').append(content.clone());
   content.targetExternalLinks('_blank');
 
+  info.unknownAddresses = [];
+  info.knownAddresses = [];
   $('.hive-address', content).each(function() {;
     var address = $.trim($(this).text());
     if (address && address in geocodes) {
       var addrID = geocodes[address].formatted_address;
+      info.knownAddresses.push(addrID);
       $(this).attr('data-addr-id', addrID);
       if (!(addrID in addrInfo))
         addrInfo[addrID] = {
@@ -284,6 +287,8 @@ function registerProgram(geocodes, content, info) {
           marker: null
         };
       addrInfo[addrID].programs.push(info);
+    } else {
+      info.unknownAddresses.push(address);
     }
   });
 
@@ -407,4 +412,22 @@ $(window).on('hashchange', function() {
   $("#panel").html(detailsHTML).fadeIn();
   hidePopups();
 });
+
+function debug() {
+  Object.keys(programInfo).forEach(function(name) {
+    var program = programInfo[name];
+    var addrCount = 0;
+    var title = program.title;
+
+    if (program.categories.length == 0)
+      console.warn(title + ' has no categories.');
+
+    if (program.knownAddresses.length == 0)
+      console.warn(title + ' has no known addresses.');
+
+    if (program.unknownAddresses.length)
+      console.warn(title + ' has unknown addresses:',
+                   program.unknownAddresses);
+  });
+}
 </script>
