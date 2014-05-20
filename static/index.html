@@ -169,6 +169,25 @@ span.hive-address:hover {
   display: block;
   width: 100%;
 }
+
+#debug-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.9);
+  white-space: pre-wrap;
+  color: #00ff00;
+  font-family: monospace;
+  display: none;
+  height: 30%;
+  width: 50%;
+  overflow-y: scroll;
+}
+
+#debug-info .warn {
+  color: yellow;
+}
 </style>
 <title>Summer 2014 Hive NYC Programs</title>
 <div id="map"></div>
@@ -181,6 +200,7 @@ span.hive-address:hover {
     <button class="select-none">Select None</button>
   </form>
 </div>
+<div id="debug-info">Debug Info</div>
 <script src="jquery.js"></script>
 <script src="underscore.js"></script>
 <script type="text/html" id="popup">
@@ -368,6 +388,12 @@ $.getJSON('/afterschool-programs.json', function(data) {
   map.featureLayer.setGeoJSON(makeGeoJSON());
   map.fitBounds(map.featureLayer.getBounds());
   $(window).trigger('hashchange');
+  if (/debug=1/.test(window.location.search)) {
+    $('#debug-info').show();
+    debug(function warn(text) {
+      $('<div class="warn"></div>').text(text).appendTo('#debug-info');
+    });
+  }
 });
 
 $('body').on('mousedown', '#panel', hidePopups);
@@ -413,21 +439,23 @@ $(window).on('hashchange', function() {
   hidePopups();
 });
 
-function debug() {
+function debug(warn) {
+  warn = warn || console.warn.bind(console);
+
   Object.keys(programInfo).forEach(function(name) {
     var program = programInfo[name];
     var addrCount = 0;
-    var title = program.title;
+    var title = '"' + program.title + '"';
 
     if (program.categories.length == 0)
-      console.warn(title + ' has no categories.');
+      warn(title + ' has no categories.');
 
     if (program.knownAddresses.length == 0)
-      console.warn(title + ' has no known addresses.');
+      warn(title + ' has no known addresses.');
 
     if (program.unknownAddresses.length)
-      console.warn(title + ' has unknown addresses:',
-                   program.unknownAddresses);
+      warn(title + ' has unknown addresses: ' +
+           program.unknownAddresses.join(', '));
   });
 }
 </script>
