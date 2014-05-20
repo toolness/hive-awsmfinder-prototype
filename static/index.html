@@ -7,6 +7,7 @@
 body {
   margin: 0;
   padding: 0;
+  font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
 #map {
@@ -15,44 +16,394 @@ body {
   bottom: 0;
   width: 100%;
 }
-</style>
-<title>AWSM Finder Prototype</title>
-<div id="map"></div>
-<script src="jquery.js"></script>
-<script>
-var map = L.mapbox
-  .map('map', 'toolness.map-137lwd3c')
-  .setView([40.738, -73.936], 12);
 
-function addMarker(map, options) {
-  L.mapbox.markerLayer({
-    type: 'Feature',
-    geometry: {
-      type: 'Point',
-      coordinates: [options.coordinates.lng, options.coordinates.lat]
-    },
-    properties: {
-      title: options.title,
-      'marker-size': 'small',
-      'marker-color': '#f0a'
-    }
-  }).addTo(map);
+.awsm-title {
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+a.awsm-details {
+  display: inline-block;
+  font-size: smaller;
+  background: #f0f0f0;
+  padding: 0 4px;
+}
+
+#panel a {
+  color: #3887BE;
+  text-decoration: none;
+}
+
+#panel a:hover {
+  color: #63b6e5;
+}
+
+#map, #panel, #map p.awsm-tagline {
+  font-size: 15px;
+  line-height: 25px;
+}
+
+#panel {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  position: absolute;
+  background: white;
+  margin: 20px;
+  color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  display: -webkit-flex;
+  flex-direction: column;
+  -webkit-flex-direction: column;
+}
+
+#panel > div {
+  padding: 0 20px;
+}
+
+a.close-box {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 20px;
+  padding: 0 10px;
+  margin: 0;
+  line-height: 30px;
+}
+
+span.hive-address {
+  cursor: pointer;
+  padding-left: 16px;
+  background-image: url(http://a.tiles.mapbox.com/v3/marker/pin-s+fcd116.png);
+  background-repeat: no-repeat;
+  background-size: 12px;
+}
+
+span.hive-address:hover {
+  background-color: #f0f0f0;
+}
+
+.title-bar {
+  background: #f0f0f0;
+}
+
+.program-content {
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  -webkit-flex: 1;
+}
+
+.program-content img {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  display: block;
+  margin: 8px 0;
+  max-width: 100%;
+  height: auto;
+}
+
+@media (orientation: landscape) {
+  #panel {
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 40%;
+    height: calc(100% - 40px);
+    height: -webkit-calc(100% - 40px);
+  }
+}
+
+@media (orientation: portrait) {
+  #panel {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+  }
+}
+
+@media (max-height: 600px) {
+  #map, #panel, #map p.awsm-tagline {
+    font-size: 12px;
+    line-height: 16px;
+  }
+}
+
+#filters {
+  position: absolute;
+  top: 80px;
+  left: 10px;
+  padding: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  background: white;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.75);
+}
+
+#filters h3 {
+  margin: 0;
+  font-weight: normal;
+  cursor: pointer;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
+#filters h3:before {
+  content: '▲ ';
+}
+
+#filters.collapsed h3:before {
+  content: '▼ ';
+}
+
+#filters.collapsed form {
+  display: none;
+}
+
+#filters label, #filters button {
+  display: block;
+  width: 100%;
+}
+</style>
+<title>AWSMfinder Prototype</title>
+<div id="map"></div>
+<div id="panel"></div>
+<div id="filters" class="collapsed">
+  <h3>Filters</h3>
+  <form>
+    <div class="categories"></div>
+    <button class="select-all">Select All</button>
+    <button class="select-none">Select None</button>
+  </form>
+</div>
+<script src="jquery.js"></script>
+<script src="underscore.js"></script>
+<script type="text/html" id="popup">
+<% programs.forEach(function(program) { %>
+  <div class="awsm-title"><%- program.title %></div>
+  <p class="awsm-tagline"><%- program.tagline %>
+    <a class="awsm-details" href="#<%- program.id %>">details &raquo;</a>
+  </p>
+<% }) %>
+</script>
+<script type="text/html" id="details">
+  <div class="title-bar">
+    <h3><%- program.title %></h3>
+    <a class="close-box" href="#">&times;</a>
+  </div>
+  <div class="program-content">
+    <%= program.content %>
+  </div>
+</script>
+<script type="text/html" id="filter">
+  <label for="filter_<%- categorySlug %>">
+    <input type="checkbox" id="filter_<%- categorySlug %>" checked
+           data-category="<%- category %>">
+    <%- category %>
+  </label>
+</script>
+<script>
+var MARKER_COLOR = '#f0a';
+var MARKER_HIGHLIGHT_COLOR = '#fcd116';
+var FILTERS = {
+  'fitness': /fitness/i,
+  'gaming': /gaming/i,
+  'fashion': /fashion/i,
+  'activism': /(activism|stereotypes)/i,
+  'film': /film/i,
+  'design': /design/i,
+  'coding': /(coding|engineering|robotics)/i,
+};
+
+var map = L.mapbox
+  .map('map')
+  .addLayer(L.mapbox.tileLayer('toolness.map-137lwd3c', {
+    detectRetina: true
+  }));
+var addrInfo = {};
+var programInfo = {};
+
+function makeGeoJSON(featuredProgramID) {
+  var filters = getFilteredCategories();
+  var isFilteredOrFeatured = function(program) {
+    return program.id == featuredProgramID ||
+           _.intersection(program.categories, filters).length;
+  };
+
+  return {
+    type: "FeatureCollection",
+    features: Object.keys(addrInfo).filter(function(id) {
+      return !!addrInfo[id].programs.filter(isFilteredOrFeatured).length;
+    }).map(function(id) {
+      var info = addrInfo[id];
+
+      return {
+        type: 'Feature',
+        id: id,
+        geometry: {
+          type: 'Point',
+          coordinates: [info.coordinates.lng, info.coordinates.lat]
+        },
+        properties: {
+          'programs': info.programs,
+          'marker-size': 'small',
+          'marker-color': info.programs.filter(function(progInfo) {
+            return progInfo.id == featuredProgramID;
+          }).length ? MARKER_HIGHLIGHT_COLOR : MARKER_COLOR
+        }
+      };
+    }),
+  };
+}
+
+function getTagline(programs, id) {
+  var li = $('li > a[href="#' + id + '"]', programs).parent().clone();
+  $('a', li).remove();
+  return li.text().slice(1);
+}
+
+function registerProgram(geocodes, content, info) {
+  content = $('<div></div>').append(content.clone());
+  content.targetExternalLinks('_blank');
+
+  $('.hive-address', content).each(function() {;
+    var address = $.trim($(this).text());
+    if (address && address in geocodes) {
+      var addrID = geocodes[address].formatted_address;
+      $(this).attr('data-addr-id', addrID);
+      if (!(addrID in addrInfo))
+        addrInfo[addrID] = {
+          programs: [],
+          coordinates: geocodes[address],
+          marker: null
+        };
+      addrInfo[addrID].programs.push(info);
+    }
+  });
+
+  info.categories = [];
+  Object.keys(FILTERS).forEach(function(category) {
+    var regexp = FILTERS[category];
+
+    if (regexp.test(content.text()) || regexp.test(info.tagline) ||
+        regexp.test(info.title))
+      info.categories.push(category);
+  });
+
+  info.content = content.html();
+  programInfo[info.id] = info;
+}
+
+function hidePopups() {
+  map.featureLayer.eachLayer(function(marker) { marker.closePopup(); });
+}
+
+function getFilteredCategories() {
+  return $('#filters input[type=checkbox]').filter(function() {
+    return this.checked;
+  }).map(function() {
+    return $(this).attr('data-category');
+  }).get();
+}
+
+Object.keys(FILTERS).forEach(function addCategoryToFilterForm(category) {
+  $(_.template($("#filter").text(), {
+    category: category,
+    categorySlug: category.toLowerCase()
+  })).appendTo('#filters .categories');
+});
+
+map.featureLayer.on('layeradd', function addPopup(e) {
+  var marker = e.layer;
+  var feature = marker.feature;
+  var popupHTML = _.template($("#popup").text(), {
+    programs: feature.properties.programs
+  });
+
+  marker.bindPopup(popupHTML, {
+    closeButton: false,
+    minWidth: 240
+  });
+  addrInfo[feature.id].marker = marker;
+});
+
+$.fn.extend({
+  targetExternalLinks: function(target) {
+    this.find('a[href]').each(function() {
+      $(this).attr('target', target);
+    });
+    return this;
+  },
+  setCheckboxes: function(value) {
+    this.find('input[type=checkbox]').each(function() {
+      this.checked = value;
+    });
+    return this;
+  }
+});
 
 $.getJSON('/afterschool-programs.json', function(data) {
   var programs = $('<div></div>').append($(data.programs));
   var geocodes = data.geocodes;
   $('h3', programs).each(function() {
-    var title = $(this).text();
-    var content = $('<div></div>').append($(this).nextUntil('h3'));
-    $('.hive-address', content).each(function() {;
-      var address = $.trim($(this).text());
-      if (address && address in geocodes)
-        addMarker(map, {
-          coordinates: geocodes[address],
-          title: title
-        });
+    var id = $(this).prev('p').find('a').attr('name');
+
+    registerProgram(geocodes, $(this).nextUntil('h3'), {
+      id: id,
+      title: $(this).text(),
+      tagline: getTagline(programs, id),
     });
   });
+  map.featureLayer.setGeoJSON(makeGeoJSON());
+  map.fitBounds(map.featureLayer.getBounds());
+  $(window).trigger('hashchange');
+});
+
+$('body').on('mousedown', '#panel', hidePopups);
+
+$('body').on('click', 'a[href^="#"]', hidePopups);
+
+$('body').on('click', '[data-addr-id]', function(e) {
+  var id = $(e.target).attr('data-addr-id');
+  var marker = addrInfo[id].marker;
+  map.setView(marker.getLatLng());
+});
+
+$('#filters h3').click(function() {
+  $('#filters').toggleClass('collapsed');
+});
+
+$('#filters form').change(function() {
+  $(window).trigger('hashchange');
+});
+
+$('#filters button.select-all').click(function() {
+  $(this).closest('form').setCheckboxes(true).trigger('change');
+  return false;
+});
+
+$('#filters button.select-none').click(function() {
+  $(this).closest('form').setCheckboxes(false).trigger('change');
+  return false;
+});
+
+$(window).on('hashchange', function() {
+  var id = location.hash.slice(1);
+  var detailsHTML = '';
+
+  if (id in programInfo)
+    detailsHTML = _.template($("#details").text(), {
+      program: programInfo[id]
+    });
+
+  map.featureLayer.setGeoJSON(makeGeoJSON(id));
+  if (!detailsHTML) return $("#panel").fadeOut();
+  $("#panel").html(detailsHTML).fadeIn();
+  hidePopups();
 });
 </script>
