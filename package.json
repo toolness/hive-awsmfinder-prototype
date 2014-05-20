@@ -5,6 +5,7 @@
   "dependencies": {
     "async": "~0.2.10",
     "cheerio": "~0.13.1",
+    "express": "4.2.0",
     "request": "~2.33.0"
   },
   "devDependencies": {},
