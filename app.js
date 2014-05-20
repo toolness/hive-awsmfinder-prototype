@@ -8,6 +8,7 @@ var geocodes = {};
 
 var DEBUG = true;
 var PORT = process.env.PORT || 3000;
+var GOOGLE_GEOCODING_API_KEY = process.env.GOOGLE_GEOCODING_API_KEY || '';
 var BLOGPOST_URL = 'http://hivenyc.org/2014/04/23/summer-2014-program-opportunities/';
 var GEO_COMPONENT_FILTERS = [
   'country:US',
@@ -27,8 +28,9 @@ function geocode(address, cb) {
 
   // https://developers.google.com/maps/documentation/geocoding/
   request({
-    url: 'http://maps.googleapis.com/maps/api/geocode/json',
+    url: 'https://maps.googleapis.com/maps/api/geocode/json',
     qs: {
+      key: GOOGLE_GEOCODING_API_KEY,
       address: address,
       sensor: 'false',
       components: GEO_COMPONENT_FILTERS
