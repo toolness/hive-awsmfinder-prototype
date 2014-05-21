@@ -391,7 +391,12 @@ $.getJSON('/afterschool-programs.json', function(data) {
   });
   map.featureLayer.setGeoJSON(makeGeoJSON());
   map.fitBounds(map.featureLayer.getBounds());
-  $(window).trigger('hashchange');
+
+  if (!window.location.hash.slice(1) && 'AwsmFinderIntro' in programInfo)
+    window.location.hash = '#AwsmFinderIntro';
+  else
+    $(window).trigger('hashchange');
+
   if (/debug=1/.test(window.location.search)) {
     $('#debug-info').show();
     debug(function warn(text) {
@@ -450,8 +455,9 @@ function debug(warn) {
     warn('"' + program.title + '" has no id.');
   });
 
-  Object.keys(programInfo).forEach(function(name) {
-    var program = programInfo[name];
+  Object.keys(programInfo).forEach(function(id) {
+    if (id == 'AwsmFinderIntro') return;
+    var program = programInfo[id];
     var addrCount = 0;
     var title = '"' + program.title + '"';
 
