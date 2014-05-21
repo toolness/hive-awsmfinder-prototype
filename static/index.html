@@ -248,6 +248,7 @@ var map = L.mapbox
   }));
 var addrInfo = {};
 var programInfo = {};
+var unknownPrograms = [];
 
 function makeGeoJSON(featuredProgramID) {
   var filters = getFilteredCategories();
@@ -322,7 +323,10 @@ function registerProgram(geocodes, content, info) {
   });
 
   info.content = content.html();
-  programInfo[info.id] = info;
+  if (!info.id)
+    unknownPrograms.push(info);
+  else
+    programInfo[info.id] = info;
 }
 
 function hidePopups() {
@@ -350,7 +354,6 @@ map.featureLayer.on('layeradd', function addPopup(e) {
   var popupHTML = _.template($("#popup").text(), {
     programs: feature.properties.programs
   });
-
   marker.bindPopup(popupHTML, {
     closeButton: false,
     minWidth: 240
@@ -441,6 +444,10 @@ $(window).on('hashchange', function() {
 
 function debug(warn) {
   warn = warn || console.warn.bind(console);
+
+  unknownPrograms.forEach(function(program) {
+    warn('"' + program.title + '" has no id.');
+  });
 
   Object.keys(programInfo).forEach(function(name) {
     var program = programInfo[name];
