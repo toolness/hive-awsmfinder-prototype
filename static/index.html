@@ -106,7 +106,21 @@ span.hive-address:hover {
   height: auto;
 }
 
+#hive-logo {
+  position: absolute;
+}
+
+#hive-logo img {
+  width: 32px;
+  height: 32px;
+}
+
 @media (orientation: landscape) {
+  #hive-logo {
+    bottom: 8px;
+    left: 8px;
+  }
+
   #panel {
     top: 0;
     bottom: 0;
@@ -118,6 +132,11 @@ span.hive-address:hover {
 }
 
 @media (orientation: portrait) {
+  #hive-logo {
+    top: 8px;
+    right: 8px;
+  }
+
   #panel {
     bottom: 0;
     left: 0;
@@ -200,6 +219,7 @@ span.hive-address:hover {
     <button class="select-none">Select None</button>
   </form>
 </div>
+<a id="hive-logo" href="#AwsmFinderIntro"><img src="hive_logo_square.png"></a>
 <div id="debug-info">Debug Info</div>
 <script src="jquery.js"></script>
 <script src="underscore.js"></script>
