@@ -297,6 +297,7 @@ function registerProgram(geocodes, content, info) {
   info.knownAddresses = [];
   $('.hive-address', content).each(function() {;
     var address = $.trim($(this).text());
+    $(this).attr('style', '');
     if (address && address in geocodes) {
       var addrID = geocodes[address].formatted_address;
       info.knownAddresses.push(addrID);
