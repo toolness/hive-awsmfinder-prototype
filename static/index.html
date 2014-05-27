@@ -253,16 +253,7 @@ span.hive-address:hover {
 <script>
 var MARKER_COLOR = '#f0a';
 var MARKER_HIGHLIGHT_COLOR = '#fcd116';
-var FILTERS = {
-  'fitness': /fitness/i,
-  'gaming': /(gaming|game)/i,
-  'fashion': /fashion/i,
-  'activism': /(activism|stereotypes)/i,
-  'film': /film/i,
-  'art': /art/i,
-  'design': /design/i,
-  'coding': /(coding|engineering|robotics)/i,
-};
+var CATEGORIES_RE = /^categories:(.+)$/i;
 
 var map = L.mapbox
   .map('map')
@@ -272,6 +263,7 @@ var map = L.mapbox
 var addrInfo = {};
 var programInfo = {};
 var unknownPrograms = [];
+var allCategories = [];
 
 function makeGeoJSON(featuredProgramID) {
   var filters = getFilteredCategories();
@@ -318,6 +310,18 @@ function registerProgram(geocodes, content, info) {
 
   info.unknownAddresses = [];
   info.knownAddresses = [];
+  info.categories = [];
+  $('li', content).each(function() {
+    var match = $.trim($(this).text()).match(CATEGORIES_RE);
+    if (!match) return;
+    var categories = match[1].split(',').map(function(cat) {
+      cat = $.trim(cat);
+      if (allCategories.indexOf(cat) == -1)
+        allCategories.push(cat);
+      return cat;
+    });
+    info.categories = categories;
+  });
   $('.hive-address', content).each(function() {;
     var address = $.trim($(this).text());
     $(this).attr('style', '');
@@ -335,15 +339,6 @@ function registerProgram(geocodes, content, info) {
     } else {
       info.unknownAddresses.push(address);
     }
-  });
-
-  info.categories = [];
-  Object.keys(FILTERS).forEach(function(category) {
-    var regexp = FILTERS[category];
-
-    if (regexp.test(content.text()) || regexp.test(info.tagline) ||
-        regexp.test(info.title))
-      info.categories.push(category);
   });
 
   info.content = content.html();
@@ -364,13 +359,6 @@ function getFilteredCategories() {
     return $(this).attr('data-category');
   }).get();
 }
-
-Object.keys(FILTERS).forEach(function addCategoryToFilterForm(category) {
-  $(_.template($("#filter").text(), {
-    category: category,
-    categorySlug: category.toLowerCase()
-  })).appendTo('#filters .categories');
-});
 
 map.featureLayer.on('layeradd', function addPopup(e) {
   var marker = e.layer;
@@ -411,6 +399,12 @@ $.getJSON('/afterschool-programs.json', function(data) {
       title: $(this).text(),
       tagline: getTagline(programs, id),
     });
+  });
+  allCategories.forEach(function addCategoryToFilterForm(category) {
+    $(_.template($("#filter").text(), {
+      category: category,
+      categorySlug: category.toLowerCase()
+    })).appendTo('#filters .categories');
   });
   map.featureLayer.setGeoJSON(makeGeoJSON());
   map.fitBounds(map.featureLayer.getBounds());
