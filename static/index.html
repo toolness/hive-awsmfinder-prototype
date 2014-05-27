@@ -218,6 +218,7 @@ span.hive-address:hover {
   <h3>Filters</h3>
   <form>
     <div class="categories"></div>
+    <input type="text" id="filter-text" autocomplete="off" placeholder="search here">
     <button class="select-all">Select All</button>
     <button class="select-none">Select None</button>
   </form>
@@ -267,9 +268,11 @@ var allCategories = [];
 
 function makeGeoJSON(featuredProgramID) {
   var filters = getFilteredCategories();
+  var filterExp = new RegExp($.trim($('#filter-text').val()), 'i');
   var isFilteredOrFeatured = function(program) {
     return program.id == featuredProgramID ||
-           _.intersection(program.categories, filters).length;
+           (_.intersection(program.categories, filters).length &&
+            filterExp.test(program.filterableText));
   };
 
   return {
@@ -342,6 +345,9 @@ function registerProgram(geocodes, content, info) {
   });
 
   info.content = content.html();
+  info.filterableText = [content.text(), info.tagline,
+                         info.title].join(' ');
+
   if (!info.id)
     unknownPrograms.push(info);
   else
@@ -438,6 +444,10 @@ $('#filters h3').click(function() {
 });
 
 $('#filters form').change(function() {
+  $(window).trigger('hashchange');
+});
+
+$('#filter-text').keyup(function() {
   $(window).trigger('hashchange');
 });
 
