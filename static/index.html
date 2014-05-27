@@ -403,6 +403,7 @@ $.getJSON('/afterschool-programs.json', function(data) {
   allCategories.forEach(function addCategoryToFilterForm(category) {
     $(_.template($("#filter").text(), {
       category: category,
+      // Um, this isn't really a slug, but it doesn't matter.
       categorySlug: category.toLowerCase()
     })).appendTo('#filters .categories');
   });
