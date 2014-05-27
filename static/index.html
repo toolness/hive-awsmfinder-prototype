@@ -465,6 +465,13 @@ $(window).on('hashchange', function() {
   hidePopups();
 });
 
+$(window).on('keyup', function(e) {
+  if (e.which == 27) {
+    hidePopups();
+    location.hash = '#';
+  }
+});
+
 function debug(warn) {
   warn = warn || console.warn.bind(console);
 
