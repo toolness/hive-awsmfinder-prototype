@@ -210,6 +210,13 @@ span.hive-address:hover {
 #debug-info .warn {
   color: yellow;
 }
+
+/* Some of the blog post lists are unnecessarily nested,
+   so we'll ensure that it has no weird effects on the
+   layout with this rule. */
+ul > ul {
+  padding: 0;
+}
 </style>
 <title>Summer 2014 Hive NYC Programs</title>
 <div id="map"></div>
