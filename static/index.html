@@ -159,16 +159,23 @@ span.hive-address:hover {
   }
 }
 
-#filters {
+.extra-widget {
   position: absolute;
-  top: 80px;
-  left: 10px;
   padding: 8px;
   font-size: 12px;
   line-height: 16px;
   background: white;
   border-radius: 3px;
   border: 1px solid rgba(0, 0, 0, 0.75);
+  left: 10px;
+}
+
+#search-text {
+  top: 80px;
+}
+
+#filters {
+  top: 120px;
 }
 
 #filters h3 {
@@ -225,11 +232,11 @@ ul > ul {
 <title>Summer 2014 Hive NYC Programs</title>
 <div id="map"></div>
 <div id="panel"></div>
-<div id="filters" class="collapsed">
+<input type="text" class="extra-widget" id="search-text" autocomplete="off" placeholder="Search...">
+<div id="filters" class="collapsed extra-widget">
   <h3>Filters</h3>
   <form>
     <div class="categories"></div>
-    <input type="text" id="filter-text" autocomplete="off" placeholder="search here">
   </form>
 </div>
 <a id="hive-logo" href="#AwsmFinderIntro"><img src="hive_logo_square.png"></a>
@@ -278,7 +285,7 @@ var categoryCounts = {};
 
 function makeGeoJSON(featuredProgramID) {
   var filters = getFilteredCategories();
-  var filterExp = new RegExp($.trim($('#filter-text').val()), 'i');
+  var filterExp = new RegExp($.trim($('#search-text').val()), 'i');
   var isFilteredOrFeatured = function(program) {
     return program.id == featuredProgramID ||
            (_.intersection(program.categories, filters).length &&
@@ -460,7 +467,7 @@ $('#filters form').change(function() {
   $(window).trigger('hashchange');
 });
 
-$('#filter-text').keyup(function() {
+$('#search-text').keyup(function() {
   $(window).trigger('hashchange');
 });
 
