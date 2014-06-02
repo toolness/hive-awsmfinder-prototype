@@ -422,6 +422,9 @@ $.getJSON('/afterschool-programs.json', function(data) {
   else
     $(window).trigger('hashchange');
 
+  if (!window.matchMedia("(max-height: 600px)").matches)
+    $('#filters').removeClass('collapsed');
+
   if (/debug=1/.test(window.location.search)) {
     $('#debug-info').show();
     debug(function warn(text) {
