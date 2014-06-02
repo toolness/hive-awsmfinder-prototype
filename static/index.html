@@ -226,8 +226,6 @@ ul > ul {
   <form>
     <div class="categories"></div>
     <input type="text" id="filter-text" autocomplete="off" placeholder="search here">
-    <button class="select-all">Select All</button>
-    <button class="select-none">Select None</button>
   </form>
 </div>
 <a id="hive-logo" href="#AwsmFinderIntro"><img src="hive_logo_square.png"></a>
@@ -253,7 +251,7 @@ ul > ul {
 </script>
 <script type="text/html" id="filter">
   <label for="filter_<%- categorySlug %>">
-    <input type="checkbox" id="filter_<%- categorySlug %>" checked
+    <input type="checkbox" id="filter_<%- categorySlug %>"
            data-category="<%- category %>">
     <%- category %>
   </label>
@@ -366,8 +364,10 @@ function hidePopups() {
 }
 
 function getFilteredCategories() {
+  var isAnythingChecked = !!$("#filters input:checked").length;
+
   return $('#filters input[type=checkbox]').filter(function() {
-    return this.checked;
+    return isAnythingChecked ? this.checked : true;
   }).map(function() {
     return $(this).attr('data-category');
   }).get();
@@ -390,12 +390,6 @@ $.fn.extend({
   targetExternalLinks: function(target) {
     this.find('a[href]').each(function() {
       $(this).attr('target', target);
-    });
-    return this;
-  },
-  setCheckboxes: function(value) {
-    this.find('input[type=checkbox]').each(function() {
-      this.checked = value;
     });
     return this;
   }
@@ -456,16 +450,6 @@ $('#filters form').change(function() {
 
 $('#filter-text').keyup(function() {
   $(window).trigger('hashchange');
-});
-
-$('#filters button.select-all').click(function() {
-  $(this).closest('form').setCheckboxes(true).trigger('change');
-  return false;
-});
-
-$('#filters button.select-none').click(function() {
-  $(this).closest('form').setCheckboxes(false).trigger('change');
-  return false;
 });
 
 $(window).on('hashchange', function() {
