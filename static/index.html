@@ -389,6 +389,15 @@ function getFilteredCategories() {
   }).get();
 }
 
+function orientMap() {
+  var padding = [$("#panel").width(), 0];
+  if (window.matchMedia("(orientation: portrait)").matches)
+    padding = [0, $("#panel").height()];
+  map.fitBounds(map.featureLayer.getBounds(), {
+    paddingBottomRight: padding
+  });
+}
+
 map.featureLayer.on('layeradd', function addPopup(e) {
   var marker = e.layer;
   var feature = marker.feature;
@@ -432,12 +441,13 @@ $.getJSON('/afterschool-programs.json', function(data) {
     })).appendTo('#filters .categories');
   });
   map.featureLayer.setGeoJSON(makeGeoJSON());
-  map.fitBounds(map.featureLayer.getBounds());
 
   if (!window.location.hash.slice(1) && 'AwsmFinderIntro' in programInfo)
     window.location.hash = '#AwsmFinderIntro';
   else
     $(window).trigger('hashchange');
+
+  orientMap();
 
   if (!window.matchMedia("(max-height: 600px)").matches)
     $('#filters').removeClass('collapsed');
