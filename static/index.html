@@ -494,6 +494,7 @@ $(window).on('hashchange', function() {
 
   map.featureLayer.setGeoJSON(makeGeoJSON(id));
   if (!detailsHTML) return $("#panel").fadeOut();
+  ga('send', 'event', 'program', 'viewDetails', id);
   $("#panel").html(detailsHTML).fadeIn();
   hidePopups();
 });
