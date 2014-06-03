@@ -10,6 +10,10 @@ var DEBUG = true;
 var PORT = process.env.PORT || 3000;
 var GOOGLE_GEOCODING_API_KEY = process.env.GOOGLE_GEOCODING_API_KEY || '';
 var BLOGPOST_URL = 'http://hivenyc.org/2014/04/23/summer-2014-program-opportunities/';
+var CLIENT_CONFIG = {
+  GA_TRACKING_ID: process.env.GA_TRACKING_ID,
+  GA_HOSTNAME: process.env.GA_HOSTNAME
+};
 var GEO_COMPONENT_FILTERS = [
   'country:US',
   'administrative_area:NY'
@@ -48,6 +52,11 @@ function geocode(address, cb) {
     cb(null, geocodes[address]);
   });
 }
+
+app.use('/', function(req, res, next) {
+  res.cookie('config', JSON.stringify(CLIENT_CONFIG));
+  next();
+});
 
 app.get('/afterschool-programs.json', function(req, res, next) {
   request.get(BLOGPOST_URL, function(err, blogRes, body) {
