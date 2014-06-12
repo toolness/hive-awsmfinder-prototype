@@ -9,7 +9,7 @@ var geocodes = {};
 var DEBUG = true;
 var PORT = process.env.PORT || 3000;
 var GOOGLE_GEOCODING_API_KEY = process.env.GOOGLE_GEOCODING_API_KEY || '';
-var BLOGPOST_URL = 'http://hivenyc.org/2014/04/23/summer-2014-program-opportunities/';
+var BLOGPOST_URL = process.env.BLOGPOST_URL || 'http://hivenyc.org/2014/04/23/summer-2014-program-opportunities/';
 var GEO_COMPONENT_FILTERS = [
   'country:US',
   'administrative_area:NY'
