@@ -11,7 +11,7 @@ The prototype currently works by "scraping" the content of Hive NYC's
 [2014 Summer Programs for Youth][1] blog post, with
 a tiny bit of custom markup added to aid with geolocation/geocoding.
 
-# Quick Start
+## Quick Start
 
 At minimum, you'll need Node 0.10. You'll also probably want a
 [Google Geocoding API Key][3].
@@ -55,7 +55,44 @@ Then point your browser to http://localhost:3000/.
 * `MAPBOX_TILE_LAYER` is the [Mapbox][] tile layer to use when
   showing the map. Defaults to `toolness.map-137lwd3c`.
 
-# Other Notes
+## Blog Post HTML Structure
+
+The blog post must be formatted in a particular way in order
+to be properly scraped. It should also include a bit of special
+markup, not visible to human readers of the blog post,
+which the prototype uses to identify special types of content:
+
+* The name of every unique program should be in a `<h3>`
+  element. Before this element should be a paragraph containing
+  an empty link with a unique `name` attribute; this is used
+  as a unique identifier for the program.
+
+* If the value of `name` attribute for a program is
+  `AwsmFinderIntro`, the content of the program is shown
+  when the user first visits the AWSM Finder. It's advised that
+  this program be contained in an element with `display: none`
+  CSS so that readers of the blog post don't see it, though
+  this probably isn't great for accessibility purposes (sorry,
+  but it *is* just a prototype).
+
+* Addresses of physical locations are wrapped in
+  `<span class="hive-address"></span>`. The scraper in `app.js`
+  uses this and scopes the location to NYC to find the
+  latitude and longitude of the address. The UI does some
+  dynamic stuff with it too, so that when users click on
+  an address, the location is centered on the map.
+
+* One of the list items in the program description should start
+  with `Categories:` and be followed by a comma-separated list.
+  This list is used to determine the list of filters in the
+  filter pane of the UI.
+
+## Other Notes
+
+* Because this prototype just scrapes a blog post to find all its
+  programs, it's limited to only holding as many programs as can
+  reasonably fit into a blog post. In other words, it won't scale to
+  hundreds or thousands of programs.
 
 * The prototype works on the latest versions of all modern
   browsers (Firefox, Chrome, IE, Opera, Safari) as of June 2014.
