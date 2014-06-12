@@ -11,6 +11,7 @@ var PORT = process.env.PORT || 3000;
 var GOOGLE_GEOCODING_API_KEY = process.env.GOOGLE_GEOCODING_API_KEY || '';
 var BLOGPOST_URL = process.env.BLOGPOST_URL || 'http://hivenyc.org/2014/04/23/summer-2014-program-opportunities/';
 var CLIENT_CONFIG = {
+  MAPBOX_TILE_LAYER: process.env.MAPBOX_TILE_LAYER || 'toolness.map-137lwd3c',
   GA_TRACKING_ID: process.env.GA_TRACKING_ID,
   GA_HOSTNAME: process.env.GA_HOSTNAME
 };

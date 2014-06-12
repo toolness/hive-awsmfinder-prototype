@@ -276,7 +276,7 @@ var CATEGORIES_RE = /^categories:(.+)$/i;
 
 var map = L.mapbox
   .map('map')
-  .addLayer(L.mapbox.tileLayer('toolness.map-137lwd3c', {
+  .addLayer(L.mapbox.tileLayer(clientconfig.MAPBOX_TILE_LAYER, {
     detectRetina: true
   }));
 var addrInfo = {};
