@@ -10,6 +10,10 @@ body {
   font-family: 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
+.text-muted {
+  color: gray;
+}
+
 #map {
   position: absolute;
   top: 0;
@@ -155,16 +159,24 @@ span.hive-address:hover {
   }
 }
 
-#filters {
+.extra-widget {
   position: absolute;
-  top: 80px;
-  left: 10px;
   padding: 8px;
   font-size: 12px;
   line-height: 16px;
   background: white;
   border-radius: 3px;
   border: 1px solid rgba(0, 0, 0, 0.75);
+  left: 10px;
+}
+
+#search-text {
+  font-family: inherit;
+  top: 80px;
+}
+
+#filters {
+  top: 120px;
 }
 
 #filters h3 {
@@ -221,19 +233,18 @@ ul > ul {
 <title>Summer 2014 Hive NYC Programs</title>
 <div id="map"></div>
 <div id="panel"></div>
-<div id="filters" class="collapsed">
+<input type="text" class="extra-widget" id="search-text" autocomplete="off" placeholder="Search...">
+<div id="filters" class="collapsed extra-widget">
   <h3>Filters</h3>
   <form>
     <div class="categories"></div>
-    <input type="text" id="filter-text" autocomplete="off" placeholder="search here">
-    <button class="select-all">Select All</button>
-    <button class="select-none">Select None</button>
   </form>
 </div>
 <a id="hive-logo" href="#AwsmFinderIntro"><img src="hive_logo_square.png"></a>
 <div id="debug-info">Debug Info</div>
 <script src="jquery.js"></script>
 <script src="underscore.js"></script>
+<script src="clientconfig.bundle.js"></script>
 <script type="text/html" id="popup">
 <% programs.forEach(function(program) { %>
   <div class="awsm-title"><%- program.title %></div>
@@ -253,9 +264,9 @@ ul > ul {
 </script>
 <script type="text/html" id="filter">
   <label for="filter_<%- categorySlug %>">
-    <input type="checkbox" id="filter_<%- categorySlug %>" checked
+    <input type="checkbox" id="filter_<%- categorySlug %>"
            data-category="<%- category %>">
-    <%- category %>
+    <%- category %> <span class="text-muted">(<%- count %>)</span>
   </label>
 </script>
 <script>
@@ -272,10 +283,11 @@ var addrInfo = {};
 var programInfo = {};
 var unknownPrograms = [];
 var allCategories = [];
+var categoryCounts = {};
 
 function makeGeoJSON(featuredProgramID) {
   var filters = getFilteredCategories();
-  var filterExp = new RegExp($.trim($('#filter-text').val()), 'i');
+  var filterExp = new RegExp($.trim($('#search-text').val()), 'i');
   var isFilteredOrFeatured = function(program) {
     return program.id == featuredProgramID ||
            (_.intersection(program.categories, filters).length &&
@@ -326,8 +338,11 @@ function registerProgram(geocodes, content, info) {
     if (!match) return;
     var categories = match[1].split(',').map(function(cat) {
       cat = $.trim(cat);
-      if (allCategories.indexOf(cat) == -1)
+      if (allCategories.indexOf(cat) == -1) {
+        categoryCounts[cat] = 0;
         allCategories.push(cat);
+      }
+      categoryCounts[cat]++;
       return cat;
     });
     info.categories = categories;
@@ -366,11 +381,22 @@ function hidePopups() {
 }
 
 function getFilteredCategories() {
+  var isAnythingChecked = !!$("#filters input:checked").length;
+
   return $('#filters input[type=checkbox]').filter(function() {
-    return this.checked;
+    return isAnythingChecked ? this.checked : true;
   }).map(function() {
     return $(this).attr('data-category');
   }).get();
+}
+
+function orientMap() {
+  var padding = [$("#panel").width(), 0];
+  if (window.matchMedia("(orientation: portrait)").matches)
+    padding = [0, $("#panel").height()];
+  map.fitBounds(map.featureLayer.getBounds(), {
+    paddingBottomRight: padding
+  });
 }
 
 map.featureLayer.on('layeradd', function addPopup(e) {
@@ -392,12 +418,6 @@ $.fn.extend({
       $(this).attr('target', target);
     });
     return this;
-  },
-  setCheckboxes: function(value) {
-    this.find('input[type=checkbox]').each(function() {
-      this.checked = value;
-    });
-    return this;
   }
 });
 
@@ -416,17 +436,22 @@ $.getJSON('/afterschool-programs.json', function(data) {
   allCategories.forEach(function addCategoryToFilterForm(category) {
     $(_.template($("#filter").text(), {
       category: category,
+      count: categoryCounts[category],
       // Um, this isn't really a slug, but it doesn't matter.
       categorySlug: category.toLowerCase()
     })).appendTo('#filters .categories');
   });
   map.featureLayer.setGeoJSON(makeGeoJSON());
-  map.fitBounds(map.featureLayer.getBounds());
 
   if (!window.location.hash.slice(1) && 'AwsmFinderIntro' in programInfo)
     window.location.hash = '#AwsmFinderIntro';
   else
     $(window).trigger('hashchange');
+
+  orientMap();
+
+  if (!window.matchMedia("(max-height: 600px)").matches)
+    $('#filters').removeClass('collapsed');
 
   if (/debug=1/.test(window.location.search)) {
     $('#debug-info').show();
@@ -454,18 +479,8 @@ $('#filters form').change(function() {
   $(window).trigger('hashchange');
 });
 
-$('#filter-text').keyup(function() {
+$('#search-text').keyup(function() {
   $(window).trigger('hashchange');
-});
-
-$('#filters button.select-all').click(function() {
-  $(this).closest('form').setCheckboxes(true).trigger('change');
-  return false;
-});
-
-$('#filters button.select-none').click(function() {
-  $(this).closest('form').setCheckboxes(false).trigger('change');
-  return false;
 });
 
 $(window).on('hashchange', function() {
@@ -479,6 +494,7 @@ $(window).on('hashchange', function() {
 
   map.featureLayer.setGeoJSON(makeGeoJSON(id));
   if (!detailsHTML) return $("#panel").fadeOut();
+  ga('send', 'event', 'program', 'viewDetails', id);
   $("#panel").html(detailsHTML).fadeIn();
   hidePopups();
 });
@@ -514,4 +530,20 @@ function debug(warn) {
            program.unknownAddresses.join(', '));
   });
 }
+</script>
+<script>
+(function setupGoogleAnalytics(config) {
+  if (!config.GA_TRACKING_ID) {
+    window.ga = function() {};
+    return;
+  }
+
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', config.GA_TRACKING_ID, config.GA_HOSTNAME);
+  ga('send', 'pageview');
+})(clientconfig);
 </script>
