@@ -14,8 +14,7 @@ a tiny bit of custom markup added to aid with geolocation/geocoding.
 # Quick Start
 
 At minimum, you'll need Node 0.10. You'll also probably want a
-[Google Geocoding API Key][3]; otherwise, you'll probably get
-`OVER_QUERY_LIMIT` errors when the app uses that API anonymously.
+[Google Geocoding API Key][3].
 
 To run it, do:
 
@@ -29,13 +28,32 @@ node app.js
 
 Then point your browser to http://localhost:3000/.
 
-If for some reason the Hive NYC blog post is unreachable, or if you just
-want to make development a bit faster, you can use a snapshot of the
-blog post by setting the following environment variable:
+## Environment Variables
 
-```
-export BLOGPOST_URL=http://localhost:3000/afterschool-programs.snapshot.html
-```
+* `GOOGLE_GEOCODING_API_KEY` is your API key for the Google
+  Geocoding API. This is technically optional, but you'll probably 
+  want to set it, or else you'll likely receive `OVER_QUERY_LIMIT`
+  errors when the app uses the API anonymously.
+
+* `BLOGPOST_URL` is the URL of the blog post to scrape for
+  program information. By default, it's the
+  [2014 Summer Programs for Youth][1] post. If for some reason
+  the post is unreachable, or if you just want to make development
+  a bit faster, you can use a snapshot of the blog post by setting 
+  this to `http://localhost:3000/afterschool-programs.snapshot.html`.
+
+* `PORT` is the port that the server binds to. Defaults to 3000.
+
+* `GA_TRACKING_ID` is the Google Analytics Tracking ID for your app.
+  Events will be transmitted whenever users look at the details for
+  a particular program. Optional.
+
+* `GA_HOSTNAME` is the hostname of your app for Google Analytics tracking.
+  It's usually the top-level domain of your app. If `GA_TRACKING_ID` is
+  defined, this must be defined too.
+
+* `MAPBOX_TILE_LAYER` is the [Mapbox][] tile layer to use when
+  showing the map. Defaults to `toolness.map-137lwd3c`.
 
 # Other Notes
 
@@ -66,3 +84,4 @@ export BLOGPOST_URL=http://localhost:3000/afterschool-programs.snapshot.html
   [1]: http://hivenyc.org/2014/04/23/summer-2014-program-opportunities/
   [2]: http://hivenyc.org/2014/01/27/2014-winter-afterschool-programs-teens/#doe
   [3]: https://developers.google.com/maps/documentation/geocoding/
+  [Mapbox]: https://www.mapbox.com/
